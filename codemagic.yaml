@@ -1,0 +1,27 @@
+workflows:
+  ios-testflight:
+    name: iPhone app — TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: local.codex.LanPhotoTransfer
+      vars:
+        XCODE_PROJECT: iPhone/LanPhotoTransfer.xcodeproj
+        XCODE_SCHEME: LanPhotoTransfer
+      xcode: latest
+    scripts:
+      - name: Apply Apple signing profile
+        script: xcode-project use-profiles
+      - name: Build signed iPhone app
+        script: xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
